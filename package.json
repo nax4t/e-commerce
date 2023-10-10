@@ -1,0 +1,16 @@
+{
+  "name": "proshop-v2",
+  "version": "1.0.0",
+  "description": "ecommerce plateform for tech related items",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "keywords": [],
+  "author": "Mohsin Ali",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
