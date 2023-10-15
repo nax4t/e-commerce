@@ -56,4 +56,8 @@ const getOrderById = asyncHandler(async(req, res) => {
     }
 })
 
-export {addOrderItems, getMyOrders, getOrderById}
+const getOrders = asyncHandler(async(req, res) => {
+    res.send('All orders')
+})
+
+export {addOrderItems, getMyOrders, getOrderById, getOrders}
