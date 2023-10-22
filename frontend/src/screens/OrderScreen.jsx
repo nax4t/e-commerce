@@ -1,12 +1,37 @@
 import { Link, useParams } from 'react-router-dom'
-import {Row, Col, ListGroup, Image, Form, Button, Card} from 'react-bootstrap'
+import {Row, Col, ListGroup, Image, Button, Card} from 'react-bootstrap'
 import Message from './../components/Message';
 import Loader from './../components/Loader';
-import { useGetOrderDetailsQuery } from '../slices/ordersApiSlice';
+import { useDeliverOrderMutation, useGetOrderDetailsQuery, usePayOrderMutation } from '../slices/ordersApiSlice';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify'
 
 const OrderScreen = () => {
     const {id: orderId} = useParams()
-    const {data: order, refetch, isLoading, error} = useGetOrderDetailsQuery(orderId)
+    const {userInfo} = useSelector((state) => state.auth)
+    const {data: order, refetch, isLoading, error} = useGetOrderDetailsQuery(orderId);
+    const [deliverOrder, {isLoading: loadingDeliver}] = useDeliverOrderMutation();
+    const [payOrder, {isLoading: loadingPay}] = usePayOrderMutation();
+
+    const deliverOrderHandler = async () => {
+        try {
+            await deliverOrder(orderId)
+            refetch()
+            toast.success('Order Delivered')
+        } catch (err) {
+            toast.error(err?.data?.message || err.message)
+        }
+    }
+
+    const payOrderHandler = async () => {
+        try {
+            await payOrder(orderId)
+            refetch()
+            toast.success('Order Paid')
+        } catch (err) {
+            toast.error(err?.data?.message || err.message)
+        }
+    }
 
     return isLoading ? <Loader /> : error ? <Message  variant='danger' /> : (
         <>
@@ -28,7 +53,7 @@ const OrderScreen = () => {
                             </p>
                             { order.isDelivered ? (
                                 <Message variant='success'>
-                                    Delivered on {order.dileveredAt}
+                                    Delivered on {order.deliveredAt}
                                 </Message>
                             ) : (
                                 <Message variant='danger'>Not Delivered</Message>
@@ -98,8 +123,23 @@ const OrderScreen = () => {
                                 </Row>
                             </ListGroup.Item>
 
-                            {/* Mark as paid */}
-                            {/* Mark as delivered */}
+                            {loadingDeliver && <Loader />}
+                            {userInfo && userInfo.isAdmin && !order.isDelivered && (
+                                <ListGroup.Item>
+                                    <Button type='button' className='btn btn-block' onClick={deliverOrderHandler}>
+                                        Mark As Delivered
+                                    </Button>
+                                </ListGroup.Item>
+                            )}
+                            
+                            {loadingPay && <Loader />}
+                            {userInfo && userInfo.isAdmin && !order.isPaid && (
+                                <ListGroup.Item>
+                                    <Button type='button' className='btn btn-block' onClick={payOrderHandler}>
+                                        Mark As Paid
+                                    </Button>
+                                </ListGroup.Item>
+                            )}
                         </ListGroup>
                     </Card>
                 </Col>
